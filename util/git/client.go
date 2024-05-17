@@ -73,6 +73,7 @@ type Client interface {
 	RevisionMetadata(revision string) (*RevisionMetadata, error)
 	VerifyCommitSignature(string) (string, error)
 	IsAnnotatedTag(string) bool
+	IsRevisionPresent(revision string) bool
 }
 
 type EventHandlers struct {
@@ -350,6 +351,21 @@ func (m *nativeGitClient) fetch(revision string) error {
 		err = m.runCredentialedCmd("fetch", "origin", "--tags", "--force", "--prune")
 	}
 	return err
+}
+
+// IsRevisionPresent checks to see if the given revision already exists locally.
+func (m *nativeGitClient) IsRevisionPresent(revision string) bool {
+	if revision == "" {
+		return false
+	}
+
+	cmd := exec.Command("git", "cat-file", "-t", revision)
+	out, err := m.runCmdOutput(cmd, runOpts{SkipErrorLogging: true})
+	if out == "commit" && err == nil {
+		return true
+	} else {
+		return false
+	}
 }
 
 // Fetch fetches latest updates from origin
