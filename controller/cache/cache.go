@@ -52,6 +52,9 @@ const (
 	// EnvClusterSyncRetryTimeoutDuration is the env variable that holds cluster retry duration when sync error happens
 	EnvClusterSyncRetryTimeoutDuration = "ARGOCD_CLUSTER_SYNC_RETRY_TIMEOUT_DURATION"
 
+	// EnvClusterCacheListItemWorkerPoolSize is the env variable to control size of the worker which processes items returned by K8s list queries
+	EnvClusterCacheListItemWorkerPoolSize = "ARGOCD_CLUSTER_CACHE_LIST_ITEM_WORKER_POOL_SIZE"
+
 	// EnvClusterCacheListPageSize is the env variable to control size of the list page size when making K8s queries
 	EnvClusterCacheListPageSize = "ARGOCD_CLUSTER_CACHE_LIST_PAGE_SIZE"
 
@@ -96,6 +99,9 @@ var (
 	// The default limit of 50 is chosen based on experiments.
 	clusterCacheListSemaphoreSize int64 = 50
 
+	// clusterCacheListItemWorkerPoolSize is the size of the worker which processes items returned by K8s list queries
+	clusterCacheListItemWorkerPoolSize int64 = 1
+
 	// clusterCacheListPageSize is the page size when performing K8s list requests.
 	// 500 is equal to kubectl's size
 	clusterCacheListPageSize int64 = 500
@@ -121,6 +127,7 @@ func init() {
 	clusterCacheResyncDuration = env.ParseDurationFromEnv(EnvClusterCacheResyncDuration, clusterCacheResyncDuration, 0, math.MaxInt64)
 	clusterCacheWatchResyncDuration = env.ParseDurationFromEnv(EnvClusterCacheWatchResyncDuration, clusterCacheWatchResyncDuration, 0, math.MaxInt64)
 	clusterSyncRetryTimeoutDuration = env.ParseDurationFromEnv(EnvClusterSyncRetryTimeoutDuration, clusterSyncRetryTimeoutDuration, 0, math.MaxInt64)
+	clusterCacheListItemWorkerPoolSize = env.ParseInt64FromEnv(EnvClusterCacheListItemWorkerPoolSize, clusterCacheListItemWorkerPoolSize, 1, math.MaxInt64)
 	clusterCacheListPageSize = env.ParseInt64FromEnv(EnvClusterCacheListPageSize, clusterCacheListPageSize, 0, math.MaxInt64)
 	clusterCacheListPageBufferSize = int32(env.ParseNumFromEnv(EnvClusterCacheListPageBufferSize, int(clusterCacheListPageBufferSize), 1, math.MaxInt32))
 	clusterCacheListSemaphoreSize = env.ParseInt64FromEnv(EnvClusterCacheListSemaphore, clusterCacheListSemaphoreSize, 0, math.MaxInt64)
@@ -528,6 +535,7 @@ func (c *liveStateCache) getCluster(server string) (clustercache.ClusterCache, e
 
 	clusterCacheOpts := []clustercache.UpdateSettingsFunc{
 		clustercache.SetListSemaphore(semaphore.NewWeighted(clusterCacheListSemaphoreSize)),
+		clustercache.SetListItemWorkerPoolSize(clusterCacheListItemWorkerPoolSize),
 		clustercache.SetListPageSize(clusterCacheListPageSize),
 		clustercache.SetListPageBufferSize(clusterCacheListPageBufferSize),
 		clustercache.SetWatchResyncTimeout(clusterCacheWatchResyncDuration),
