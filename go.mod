@@ -294,7 +294,7 @@ require (
 )
 
 replace (
-	github.com/argoproj/gitops-engine => github.com/canva/gitops-engine v0.0.0-20250613143806-e1ebffda2682
+	github.com/argoproj/gitops-engine => github.com/canva/gitops-engine v0.0.0-20250613161536-2c1cf067dd7c
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 => github.com/OvyFlash/telegram-bot-api/v5 v5.0.0-20240108230938-63e5c59035bf
 
 	github.com/golang/protobuf => github.com/golang/protobuf v1.5.4
