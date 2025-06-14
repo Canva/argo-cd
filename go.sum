@@ -156,8 +156,8 @@ github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdb
 github.com/bsm/gomega v1.27.10 h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA=
 github.com/bsm/gomega v1.27.10/go.mod h1:JyEr/xRbxbtgWNi8tIEVPUYZ5Dzef52k01W3YH0H+O0=
 github.com/bwmarrin/discordgo v0.19.0/go.mod h1:O9S4p+ofTFwB02em7jkpkV8M3R0/PUVOwN61zSZ0r4Q=
-github.com/canva/gitops-engine v0.0.0-20250614100040-3ad0a22c7a63 h1:jgsvEqM0bjYvTHOE+6QObZ78ZsEinuv4ePYO5b0umdI=
-github.com/canva/gitops-engine v0.0.0-20250614100040-3ad0a22c7a63/go.mod h1:WsnykM8idYRUnneeT31cM/Fq/ZsjkefCbjiD8ioCJkU=
+github.com/canva/gitops-engine v0.0.0-20250614112126-9c06624bb8b9 h1:lUf1Nd5/fb5mt0LxQPqBP076M1cmE59kYOrztgJvM9Y=
+github.com/canva/gitops-engine v0.0.0-20250614112126-9c06624bb8b9/go.mod h1:WsnykM8idYRUnneeT31cM/Fq/ZsjkefCbjiD8ioCJkU=
 github.com/casbin/casbin/v2 v2.1.2/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
 github.com/casbin/casbin/v2 v2.102.0 h1:weq9iSThUSL21SH3VrwoKa2DgRsaYMfjRNX/yOU3Foo=
 github.com/casbin/casbin/v2 v2.102.0/go.mod h1:LO7YPez4dX3LgoTCqSQAleQDo0S0BeZBDxYnPUl95Ng=
