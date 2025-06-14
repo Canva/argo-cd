@@ -7,6 +7,7 @@ import (
 	"math"
 	"net"
 	"net/url"
+	"os"
 	"os/exec"
 	"reflect"
 	"strconv"
@@ -533,6 +534,13 @@ func (c *liveStateCache) getCluster(server string) (clustercache.ClusterCache, e
 		clusterCacheConfig.WarningHandler = rest.NoWarnings{}
 	}
 
+	durationLock := sync.Mutex{}
+	groupKindDurations := map[string]*struct {
+		itemCount int
+		duration  time.Duration
+	}{}
+	syncMode := os.Getenv("SYNC_MODE")
+
 	clusterCacheOpts := []clustercache.UpdateSettingsFunc{
 		clustercache.SetListSemaphore(semaphore.NewWeighted(clusterCacheListSemaphoreSize)),
 		clustercache.SetListItemWorkerPoolSize(clusterCacheListItemWorkerPoolSize),
@@ -545,6 +553,8 @@ func (c *liveStateCache) getCluster(server string) (clustercache.ClusterCache, e
 		clustercache.SetNamespaces(cluster.Namespaces),
 		clustercache.SetClusterResources(cluster.ClusterResources),
 		clustercache.SetPopulateResourceInfoHandler(func(un *unstructured.Unstructured, isRoot bool) (interface{}, bool) {
+			start := time.Now()
+
 			res := &ResourceInfo{}
 			populateNodeInfo(un, res, resourceCustomLabels)
 			c.lock.RLock()
@@ -567,6 +577,30 @@ func (c *liveStateCache) getCluster(server string) (clustercache.ClusterCache, e
 				} else {
 					res.manifestHash = hash
 				}
+			}
+
+			if res.AppName != "" {
+				gk := gvk.GroupKind().String()
+				durationLock.Lock()
+				if _, exists := groupKindDurations[gk]; !exists {
+					groupKindDurations[gk] = &struct {
+						itemCount int
+						duration  time.Duration
+					}{}
+				}
+				duration := groupKindDurations[gk]
+				duration.itemCount++
+				duration.duration += time.Since(start)
+				if duration.itemCount%int(clusterCacheListPageSize) == 0 {
+					log.Info(
+						"List page info handlers populated",
+						"processingDuration", duration.duration.Milliseconds(),
+						"itemCount", duration.itemCount,
+						"groupKind", gk,
+						"syncMode", syncMode,
+					)
+				}
+				durationLock.Unlock()
 			}
 
 			// edge case. we do not label CRDs, so they miss the tracking label we inject. But we still
