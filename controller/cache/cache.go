@@ -580,32 +580,30 @@ func (c *liveStateCache) getCluster(server string) (clustercache.ClusterCache, e
 				}
 			}
 
-			if res.AppName != "" {
-				gk := gvk.GroupKind().String()
-				durationLock.Lock()
-				if _, exists := groupKindDurations[gk]; !exists {
-					groupKindDurations[gk] = &struct {
-						start     time.Time
-						itemCount int
-						duration  time.Duration
-					}{
-						start: time.Now(),
-					}
+			gk := gvk.GroupKind().String()
+			durationLock.Lock()
+			if _, exists := groupKindDurations[gk]; !exists {
+				groupKindDurations[gk] = &struct {
+					start     time.Time
+					itemCount int
+					duration  time.Duration
+				}{
+					start: time.Now(),
 				}
-				duration := groupKindDurations[gk]
-				duration.itemCount++
-				duration.duration += time.Since(start)
-				if duration.itemCount%int(clusterCacheListPageSize) == 0 {
-					log.
-						WithField("duration", time.Since(duration.start).Milliseconds()).
-						WithField("processingDuration", duration.duration.Milliseconds()).
-						WithField("itemCount", duration.itemCount).
-						WithField("groupKind", gk).
-						WithField("syncMode", syncMode).
-						Info("List page info populated")
-				}
-				durationLock.Unlock()
 			}
+			duration := groupKindDurations[gk]
+			duration.itemCount++
+			duration.duration += time.Since(start)
+			if duration.itemCount%int(clusterCacheListPageSize) == 0 {
+				log.
+					WithField("duration", time.Since(duration.start).Milliseconds()).
+					WithField("processingDuration", duration.duration.Milliseconds()).
+					WithField("itemCount", duration.itemCount).
+					WithField("groupKind", gk).
+					WithField("syncMode", syncMode).
+					Info("List page info populated")
+			}
+			durationLock.Unlock()
 
 			// edge case. we do not label CRDs, so they miss the tracking label we inject. But we still
 			// want the full resource to be available in our cache (to diff), so we store all CRDs
