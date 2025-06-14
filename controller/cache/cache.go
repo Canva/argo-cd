@@ -536,6 +536,7 @@ func (c *liveStateCache) getCluster(server string) (clustercache.ClusterCache, e
 
 	durationLock := sync.Mutex{}
 	groupKindDurations := map[string]*struct {
+		start     time.Time
 		itemCount int
 		duration  time.Duration
 	}{}
@@ -584,21 +585,24 @@ func (c *liveStateCache) getCluster(server string) (clustercache.ClusterCache, e
 				durationLock.Lock()
 				if _, exists := groupKindDurations[gk]; !exists {
 					groupKindDurations[gk] = &struct {
+						start     time.Time
 						itemCount int
 						duration  time.Duration
-					}{}
+					}{
+						start: time.Now(),
+					}
 				}
 				duration := groupKindDurations[gk]
 				duration.itemCount++
 				duration.duration += time.Since(start)
 				if duration.itemCount%int(clusterCacheListPageSize) == 0 {
-					log.Info(
-						"List page info handlers populated",
-						"processingDuration", duration.duration.Milliseconds(),
-						"itemCount", duration.itemCount,
-						"groupKind", gk,
-						"syncMode", syncMode,
-					)
+					log.
+						WithField("duration", time.Since(duration.start).Milliseconds()).
+						WithField("processingDuration", duration.duration.Milliseconds()).
+						WithField("itemCount", duration.itemCount).
+						WithField("groupKind", gk).
+						WithField("syncMode", syncMode).
+						Info("List page info populated")
 				}
 				durationLock.Unlock()
 			}
